@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <input type="text" name="" id="" style="display: block; width: 100%;">
+    <button>Test</button>
+    <p>
+        La réponse <span></span> !
+    </p>
+
+    <script>
+
+        const btn = document.querySelector("button"),
+              txt = document.querySelector("input"),
+              ret = document.querySelector("span");
+
+        btn.onclick = () => {
+
+            fetch(txt.value).then(data => {
+                data.json().catch(e => {
+                    ret.innerText = "n'est pas au format JSON"
+                }).then(obj => {
+                    ret.innerText = ("@axiome" in obj ? "est" : "n'est pas") + ' bien formée';
+                });
+            })
+
+        }
+
+    </script>
+
+</body>
+</html>
