@@ -1,4 +1,6 @@
 import express from "express";
+import { app_AUTH_AID } from "../Application/application";
+import { usr_AUTH_UID } from "../Utilisateur/utilisateur";
 
 type transaction<T> = {
     "@axiome": {

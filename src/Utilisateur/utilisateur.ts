@@ -1,6 +1,12 @@
-type usr_AUTH_UID = [ string, string, string ]; // [ uid, jeton, hote ]
+import * as jose from "jose";
 
-type usr_DBobj = {
+export type usr_AUTH_UID = [ string, string, string ]; // [ uid, jeton, hote ]
+
+export type usr_scope = {
+
+}
+
+export type usr_DBobj = {
     //public
     uid: string;
     id: string;
@@ -12,11 +18,11 @@ type usr_DBobj = {
     jetons: usr_Jeton_DBobj[];
 };
 
-class Utilisateur {
+export class Utilisateur {
 
     private jetons: usr_Jeton[] = [];
 
-    constructor (private db_obj: usr_DBobj, private db: any) {
+    constructor (private db_obj: usr_DBobj, private domaine: any) {
         
     }
 
@@ -45,9 +51,10 @@ class Utilisateur {
      * @param mdp: mot de passe
      * @returns Jeton de connextion (ou undefined)
      */
-    connecte (mdp: string): usr_Jeton | undefined {
+    async connecte (mdp: string): Promise<usr_Jeton | undefined> {
+        if (this.db_obj.mdp_hash != mdp) return undefined;
 
-        return undefined;
+        return undefined
     }
 
     /**
@@ -63,16 +70,16 @@ class Utilisateur {
 }
 
 
-type usr_Jeton_DBobj = {
+export type usr_Jeton_DBobj = {
     jeton: string;
     agent: string;
     creation: Date;
     peremption: Date;
 }
 
-class usr_Jeton {
+export class usr_Jeton {
 
-    constructor (private db_obj: usr_Jeton_DBobj, private db: any) {
+    constructor (private db_obj: usr_Jeton_DBobj, private domaine: any) {
 
     }
 

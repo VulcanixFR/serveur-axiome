@@ -1,1 +1,1 @@
-type app_AUTH_AID = [ string, string ]; // [ aid, jeton ]
+export type app_AUTH_AID = [ string, string ]; // [ aid, jeton ]
