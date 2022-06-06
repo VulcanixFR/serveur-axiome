@@ -1,4 +1,5 @@
 import * as jose from "jose";
+import { v4, validate, version } from "uuid";
 import { AxUsrDB } from "./db";
 
 export type usr_AUTH_UID = [ string, string, string ]; // [ uid, jeton, hote ]
@@ -14,6 +15,8 @@ export type usr_DBobj = {
     email: string;
     naissance: Date;
     photo: string;
+    nom: string;
+    prenom: string;
     //privé
     mdp_hash: string;
     jetons: usr_Jeton_DBobj[];
@@ -52,6 +55,18 @@ export class Utilisateur {
         return [...this.db_obj.roles];
     }
 
+    get nom () {
+        return this.db_obj.nom;
+    }
+
+    get prenom () {
+        return this.db_obj.prenom;
+    }
+
+    get patronyme () {
+        return this.db_obj.nom + " " + this.db_obj.prenom;
+    }
+
     /**
      * Si le mot de passe concorde, crée un jeton (jwt) pour l'utilisateur 
      * @param mdp: mot de passe
@@ -72,7 +87,17 @@ export class Utilisateur {
 
         return false
     }
+    
 
+
+    //Statique
+    static gen_uid (): string {
+        return "u:" + v4();
+    }
+    static est_uid (str: string): boolean {
+        let s = str.split(':');
+        return s[0] === "u" && validate(s[1]) && version(s[1]) == 4;
+    }
 }
 
 

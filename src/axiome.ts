@@ -59,7 +59,11 @@ export async function initAxiome (): Promise<Axiome> {
         default:
             throw "Base de données incompatible";
     }
-    await db.init();
+    let ok = await db.init();
+    if (!ok) {
+        console.error("Problème base de données !")
+        process.exit(2);
+    }
 
     let axiome: Axiome = {
         port: parseInt(process.env.AXPORT || "4200"), version: VERSION,

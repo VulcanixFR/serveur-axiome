@@ -1,5 +1,5 @@
 import express from 'express';
-import Transaction, { transaction_middleware } from './Transaction/transaction';
+import { transaction_middleware } from './Transaction/transaction';
 import { initAxiome } from './axiome';
 import { domaine_middleware } from './Domaine/domaine';
 
@@ -19,8 +19,6 @@ console.log("Bonjour !");
     App.use("/static", express.static("static"))
 
     App.get("/", (req, res, next) => { 
-        // let T = Transaction("Oui", req.domaine.host, Axiome.version.court(), undefined);
-        // res.json(T) 
         res.transaction("Oui.")
     })
 
