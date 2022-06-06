@@ -19,7 +19,6 @@ export type usr_DBobj = {
     prenom: string;
     //privé
     mdp_hash: string;
-    jetons: usr_Jeton_DBobj[];
     roles: string[]
 };
 
@@ -27,7 +26,7 @@ export class Utilisateur {
 
     private jetons: usr_Jeton[] = [];
 
-    constructor (private db_obj: usr_DBobj, private domaine: any, private db: AxUsrDB) {
+    constructor (private db_obj: usr_DBobj, private db: AxUsrDB) {
         
     }
 
@@ -110,7 +109,7 @@ export type usr_Jeton_DBobj = {
 
 export class usr_Jeton {
 
-    constructor (private db_obj: usr_Jeton_DBobj, private domaine: any) {
+    constructor (private db_obj: usr_Jeton_DBobj, private db: AxUsrDB) {
 
     }
 

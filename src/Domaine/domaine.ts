@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { usr_DBobj } from "../Utilisateur/utilisateur";
 import { AxDmnDB } from "./db";
 
 export type dmn_DBobj = {
@@ -24,7 +23,7 @@ export type dmn_DBobj = {
 
 export class Domaine {
 
-    constructor (private dmn: dmn_DBobj, private db?: AxDmnDB) {
+    constructor (private dmn: dmn_DBobj, private db: AxDmnDB) {
         
     }
 

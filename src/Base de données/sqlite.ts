@@ -1,11 +1,10 @@
 import { Database } from "sqlite";
 import { dmn_DBobj, Domaine } from "../Domaine/domaine";
+import { AxDmnDBSQlite } from "../Domaine/sqlite";
 import { Utilisateur } from "../Utilisateur/utilisateur";
 import { AxDB } from "./database";
 
 export class AxDBSQLite implements AxDB {
-
-    ok: boolean = false;
 
     constructor (private db: Database) {
         
@@ -56,8 +55,9 @@ export class AxDBSQLite implements AxDB {
             let d = await this.db.get<raw_dmn>(select_domaine, host);
             if (!d) throw "Hôte invalide !";
 
-            let db_obj: dmn_DBobj = parse_dmn(d);            
-            resolve(new Domaine(db_obj));
+            let db_obj: dmn_DBobj = parse_dmn(d);  
+            let dmndb = new AxDmnDBSQlite(this.db, host);
+            resolve(new Domaine(db_obj, dmndb));
         })
     }
 

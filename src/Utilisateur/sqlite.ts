@@ -1,0 +1,147 @@
+import { Database } from "sqlite";
+import { AxUsrDB } from "./db";
+import { usr_DBobj, usr_Jeton, usr_Jeton_DBobj } from "./utilisateur";
+
+
+export class AxUsrDBSQLite implements AxUsrDB {
+    
+    constructor (private db: Database, private host: string, private uid: string) {
+
+    }
+
+    init (): Promise<boolean> {
+        return new Promise(async (res, _) => {
+            res(true);
+        })
+    }
+
+    self(): Promise<usr_DBobj> {
+        return new Promise(async (resolve, _) => {
+            try {
+                let raw = await this.db.get<sqlite_raw_usr>(sqlite_select_usr(this.host), this.uid);
+                if (!raw) throw "Erreur Base de données !";               
+                resolve(sqlite_parse_usr(raw));
+            } catch (error) {
+                console.trace(error);
+            }
+        })
+    }
+
+    jetons(): Promise<usr_Jeton[]> {
+        return new Promise(async (resovle, _) => {
+            let list = await this.db.all<{jeton: string}[]>(sqlite_usr_jetons_select(this.host), this.uid);
+            let jetons = await Promise.all(list.map(e => this.jeton(e.jeton)));
+            resovle(jetons);
+        })
+    }
+
+    jeton (j: string): Promise<usr_Jeton> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let raw = await this.db.get<sqlite_usr_Jeton_DBobj>(sqlite_usr_jeton_select(this.host), j);
+                if (!raw) return reject("Erreur base de données");
+                let obj = sqlite_usr_jeton_parse(raw);
+                resolve(new usr_Jeton(obj, this));
+            } catch (err) {
+                console.trace(err)
+                reject();
+            }
+        })
+    }
+    
+    set_email (email: string): Promise<boolean> {
+        return new Promise(async (resolve, _) => {
+            resolve(false)
+        })
+    };
+
+    set_naissance (naissance: Date): Promise<boolean> {
+        return new Promise(async (resolve, _) => {
+            resolve(false)
+        })
+    };
+
+    set_photo (photo: string): Promise<boolean> {
+        return new Promise(async (resolve, _) => {
+            resolve(false)
+        })
+    };
+
+    set_mdp (hash: string): Promise<boolean> {
+        return new Promise(async (resolve, _) => {
+            resolve(false)
+        })
+    };
+
+    set_roles (roles: string[]): Promise<boolean> {
+        return new Promise(async (resolve, _) => {
+            resolve(false)
+        })
+    };
+
+
+    add_jeton (jeton: string, agent: string, creation: Date, peremption: Date): Promise<boolean> {
+        return new Promise(async (resolve, _) => {
+            resolve(false)
+        })
+    };
+    
+    rm_jeton (jeton: string): Promise<boolean> {
+        return new Promise(async (resolve, _) => {
+            resolve(false)
+        })
+    };
+
+}
+
+
+export type sqlite_raw_usr = {
+    //public
+    uid: string;
+    id: string;
+    email: string;
+    naissance: number;
+    photo: string;
+    nom: string;
+    prenom: string;
+    //privé
+    mdp_hash: string;
+    roles: string;
+};
+
+export function sqlite_parse_usr (u: sqlite_raw_usr): usr_DBobj {
+    return {
+        uid: u.uid,
+        id: u.id,
+        email: u.email,
+        naissance: new Date(u.naissance),
+        photo: u.photo,
+        nom: u.nom,
+        prenom: u.prenom,
+        //privé
+        mdp_hash: u.mdp_hash,
+        roles: (u.roles || '').split(":"),
+    }
+}
+
+
+export const sqlite_select_usr = (h: string) => 
+    `SELECT * FROM d_${h}_utilisateurs WHERE uid = "?";`;
+
+export type sqlite_usr_Jeton_DBobj = {
+    jeton: string;
+    agent: string;
+    creation: number;
+    peremption: number;
+}
+export function sqlite_usr_jeton_parse (i: sqlite_usr_Jeton_DBobj): usr_Jeton_DBobj {
+    return {
+        agent: i.agent, creation: new Date(i.creation), jeton: i.jeton, peremption: new Date(i.peremption)
+    }
+}
+export const sqlite_usr_jetons_select = (h: string) => 
+    `SELECT * FROM d_${h}_utilisateurs_jetons WHERE uid = ?;`;
+
+    
+export const sqlite_usr_jeton_select = (h: string) => 
+    `SELECT * FROM d_${h}_utilisateurs_jetons WHERE jeton = ?;`;

@@ -1,12 +1,12 @@
-import { usr_DBobj, usr_Jeton_DBobj } from "./utilisateur";
+import { usr_DBobj, usr_Jeton } from "./utilisateur";
 
 export interface AxUsrDB {
 
-    ok: boolean;
     init (): Promise<boolean>;
 
     self (): Promise<usr_DBobj>;
-    jetons (): Promise<usr_Jeton_DBobj[]>;
+    jetons (): Promise<usr_Jeton[]>;
+    jeton (j: string): Promise<usr_Jeton>;
 
     //setters
     set_email: (email: string) => Promise<boolean>;
@@ -16,9 +16,10 @@ export interface AxUsrDB {
     set_roles: (roles: string[]) => Promise<boolean>;
 
     //Ajouts
-    add_jeton: (jeton: string) => Promise<boolean>;
+    add_jeton: (jeton: string, agent: string, creation: Date, peremption: Date) => Promise<boolean>;
     
     //Enlève
     rm_jeton: (jeton: string) => Promise<boolean>;
 
 }
+
