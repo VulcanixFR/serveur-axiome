@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { app_AUTH_AID } from "../Application/application";
 import { usr_AUTH_UID } from "../Utilisateur/utilisateur";
 
@@ -35,4 +35,9 @@ export default function Transaction<T> (valeur: T, domaine: string, version: str
         },
         valeur
     }
+}
+
+export function transaction_middleware (req: Request, res: Response, next: NextFunction) {
+    res.transaction = function (valeur: any) { this.json(Transaction(valeur, req.domaine.host, req.axiome.version.court(), req.auth)) }
+    next();
 }

@@ -1,4 +1,8 @@
+import { open } from "sqlite";
+import { Database } from "sqlite3";
 import { app_AUTH_AID } from "./Application/application";
+import { AxDB } from "./Base de données/database";
+import { AxDBSQLite } from "./Base de données/sqlite";
 import { Domaine } from "./Domaine/domaine";
 import { usr_AUTH_UID, Utilisateur } from "./Utilisateur/utilisateur";
 
@@ -10,6 +14,9 @@ declare global {
             auth?: usr_AUTH_UID | app_AUTH_AID;
             domaine: Domaine;
             axiome: Axiome;
+        }
+        export interface Response {
+            transaction: (valeur: any) => void;
         }
     }
 }
@@ -31,6 +38,7 @@ export type Axiome = {
     port: number;
     version: AxVersion;
     domaines: Domaine[];
+    db: AxDB;
 };
 
 export async function initAxiome (): Promise<Axiome> {
@@ -42,12 +50,23 @@ export async function initAxiome (): Promise<Axiome> {
         process.exit(1);
     }
 
+    let db: AxDB;
+    switch (process.env.AXDB) {
+        case db_choix[0]:
+            let tmp = await open({ driver: Database, filename: process.env.AXSQLITEFILE || "data.sqlite" });
+            db = new AxDBSQLite(tmp);
+            break;
+        default:
+            throw "Base de données incompatible";
+    }
+    await db.init();
+
     let axiome: Axiome = {
         port: parseInt(process.env.AXPORT || "4200"), version: VERSION,
-        domaines: []
+        domaines: [], db
     }
 
-    axiome.domaines.push(new Domaine({ alias: [ "127.0.0.1" ], host: 'localhost' }, axiome, true))
+    axiome.domaines = await Promise.all((await db.domaines()).map(e => db.domaine(e.host)));
 
     return axiome;
 

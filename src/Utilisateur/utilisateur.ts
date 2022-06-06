@@ -1,4 +1,5 @@
 import * as jose from "jose";
+import { AxUsrDB } from "./db";
 
 export type usr_AUTH_UID = [ string, string, string ]; // [ uid, jeton, hote ]
 
@@ -16,13 +17,14 @@ export type usr_DBobj = {
     //privé
     mdp_hash: string;
     jetons: usr_Jeton_DBobj[];
+    roles: string[]
 };
 
 export class Utilisateur {
 
     private jetons: usr_Jeton[] = [];
 
-    constructor (private db_obj: usr_DBobj, private domaine: any) {
+    constructor (private db_obj: usr_DBobj, private domaine: any, private db: AxUsrDB) {
         
     }
 
@@ -44,6 +46,10 @@ export class Utilisateur {
 
     get photo () {
         return this.db_obj.photo
+    }
+
+    get roles () {
+        return [...this.db_obj.roles];
     }
 
     /**
