@@ -61,9 +61,26 @@ export class Utilisateur {
     }
 
     get patronyme () {
-        return this.db_obj.nom + " " + this.db_obj.prenom;
+        return [this.db_obj.nom, this.db_obj.prenom].join(" ");
     }
 
+
+    /**
+     * Donne les informations brutes de l'utilisateur
+     */
+    get brut () {
+        return {
+            uid: this.uid,
+            id: this.id,
+            email: this.email,
+            naissance: this.naissance,
+            photo: this.photo,
+            roles: this.roles,
+            nom: this.nom,
+            prenom: this.prenom,
+            patronyme: this.patronyme
+        }
+    }
     /**
      * Si le mot de passe concorde, crée un jeton (jwt) pour l'utilisateur 
      * @param mdp: mot de passe
@@ -89,7 +106,31 @@ export class Utilisateur {
         if (J) return J.est_valide();
         return false;
     }
+
+    set_email (email: string) { return this.db.set_email(email) }
+    set_naissance (date: Date) { return this.db.set_naissance(date) }
+    set_photo (photo: string) { return this.db.set_photo(photo) }
+
+    set_mdp (clair: string) {
+        let hash = clair;
+        return this.db.set_mdp(hash);
+    }
     
+    ajoute_role (role: string) {
+        if (this.roles.indexOf(role) != -1) {
+            this.db_obj.roles.push(role);
+        }
+        return this.db.set_roles(this.roles);
+    }
+    suppr_role (role: string) {
+        this.db_obj.roles = this.db_obj.roles.filter(e => e != role);
+        return this.db.set_roles(this.db_obj.roles);
+    }
+
+    async connexions () {
+        return (await this.db.jetons()).map(j => j.brut);
+    }
+
     //Statique
     static gen_uid (): string {
         return "u:" + v4();
@@ -115,6 +156,10 @@ export class usr_Jeton {
 
     }
 
+    get jti () {
+        return this.db_obj.jti
+    }
+
     get agent () {
         return this.db_obj.agent;
     }
@@ -129,6 +174,16 @@ export class usr_Jeton {
 
     get peremption () {
         return this.db_obj.peremption;
+    }
+
+    get brut () {
+        return {
+            jti: this.jti,
+            agent: this.agent,
+            jeton: this.jeton,
+            creation: this.creation,
+            peremption: this.peremption
+        }
     }
 
     /**

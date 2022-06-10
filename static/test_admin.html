@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin</title>
+</head>
+<body>
+    
+    <div class="Req" > 
+        <p class="url">/test/admin</p>
+        <code><pre></pre></code>
+        <button>Récupère</button>
+    </div>
+
+    
+    <div class="Req" > 
+        <p class="url">/test/admin/mdp?val=$0</p>
+        <code><pre></pre></code>
+        <input type="text">
+        <button>Modifier</button>
+    </div>
+
+    
+    <div class="Req" > 
+        <p class="url">/test/admin/co?val=$0</p>
+        <code><pre></pre></code>
+        <input type="text">
+        <button>Connecte</button>
+    </div>
+
+    
+    <div class="Req" > 
+        <p class="url">/test/$0/jetons</p>
+        <code><pre></pre></code>
+        <input type="text">
+        <button>Récupère</button>
+    </div>
+
+    <script>
+
+        document.querySelectorAll("div.Req").forEach(div => {
+
+            let btn = div.querySelector("button");
+            let inputs = div.querySelectorAll("input");
+            let p = div.querySelector("p");
+            let code = div.querySelector("pre")
+            
+            const txt = p.innerText;
+            p.style.color = "blue";
+            p.style.fontWeight = "bolder";
+
+            btn.onclick = async () => {
+                let url = txt;
+                inputs.forEach((i, n) => {
+                    url = url.replace(`$${n}`, i.value);
+                })
+                
+                p.style.color = "orange";
+                p.innerText = url;
+                let res = await fetch(url).catch(e => {
+                    console.error(e);
+                    p.style.color = "red";
+                });
+                p.style.color = (res.status >= 400 ? "red" : 'green');
+
+                let out = await res.json();
+                console.log(out)
+                code.innerHTML = JSON.stringify(out.valeur, undefined, 4);
+
+            }
+
+        })
+
+    </script>
+
+</body>
+</html>

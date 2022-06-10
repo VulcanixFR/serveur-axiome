@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { Utilisateur } from "../Utilisateur/utilisateur";
 import { AxDmnDB } from "./db";
 
 export type dmn_DBobj = {
@@ -50,6 +51,14 @@ export class Domaine {
 
     get admin_id () {
         return this.dmn.admin 
+    }
+
+    nombre_utilisateurs (): Promise<number> {
+        return this.db.utilisateurs()
+    }
+
+    async utilisateur (uid: string): Promise<Utilisateur | undefined> {
+        return await this.db.utilisateur(uid);
     }
 
 }

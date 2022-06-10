@@ -21,7 +21,7 @@ export class AxUsrDBSQLite implements AxUsrDB {
     self(): Promise<usr_DBobj> {
         return new Promise(async (resolve, _) => {
             try {
-                let raw = await this.db.get<sqlite_raw_usr>(sqlite_select_usr(this.host), this.uid);
+                let raw = await this.db.get<sqlite_raw_usr>(sqlite_select_usr(this.host, this.uid));
                 if (!raw) throw "Erreur Base de données !";               
                 resolve(sqlite_parse_usr(raw));
             } catch (error) {
@@ -32,7 +32,7 @@ export class AxUsrDBSQLite implements AxUsrDB {
 
     jetons(): Promise<usr_Jeton[]> {
         return new Promise(async (resovle, _) => {
-            let list = await this.db.all<sqlite_usr_Jeton_DBobj[]>(sqlite_usr_jetons_select(this.host), this.uid);
+            let list = await this.db.all<sqlite_usr_Jeton_DBobj[]>(sqlite_usr_jetons_select(this.host, this.uid));
             // let jetons = await Promise.all(list.map(e => this.jeton(e.jeton)));
             let jetons = list.map(e => new usr_Jeton(sqlite_usr_jeton_parse(e), this));
             resovle(jetons);
@@ -42,7 +42,7 @@ export class AxUsrDBSQLite implements AxUsrDB {
     jeton (jti: string): Promise<usr_Jeton> {
         return new Promise(async (resolve, reject) => {
             try {
-                let raw = await this.db.get<sqlite_usr_Jeton_DBobj>(sqlite_usr_jeton_select(this.host), jti);
+                let raw = await this.db.get<sqlite_usr_Jeton_DBobj>(sqlite_usr_jeton_select(this.host, jti));
                 if (!raw) return reject("Erreur base de données");
                 let obj = sqlite_usr_jeton_parse(raw);
                 resolve(new usr_Jeton(obj, this));
@@ -55,35 +55,36 @@ export class AxUsrDBSQLite implements AxUsrDB {
     
     set_email (email: string): Promise<boolean> {
         return new Promise(async (resolve, _) => {
-            await this.db.exec(sqlite_usr_update(this.host, this.uid, [ "email" ]), email);
+            await this.db.exec(sqlite_usr_update(this.host, this.uid, [[ "email" , email]]));
             resolve(true)
         })
     };
 
     set_naissance (naissance: Date): Promise<boolean> {
         return new Promise(async (resolve, _) => {
-            await this.db.exec(sqlite_usr_update(this.host, this.uid, [ "naissance" ]), naissance);
+            await this.db.exec(sqlite_usr_update(this.host, this.uid, [[ "naissance" , naissance.toString() ]]));
             resolve(true)
         })
     };
 
     set_photo (photo: string): Promise<boolean> {
         return new Promise(async (resolve, _) => {
-            await this.db.exec(sqlite_usr_update(this.host, this.uid, [ "photo" ]), photo);
+            await this.db.exec(sqlite_usr_update(this.host, this.uid, [[ "photo" , photo]]));
             resolve(true)
          })
     };
 
     set_mdp (hash: string): Promise<boolean> {
         return new Promise(async (resolve, _) => {
-            await this.db.exec(sqlite_usr_update(this.host, this.uid, [ "mdp_hash" ]), hash);
+            console.log(sqlite_usr_update(this.host, this.uid, [[ "mdp_hash", hash]]))
+            await this.db.exec(sqlite_usr_update(this.host, this.uid, [[ "mdp_hash", hash]]));
             resolve(true)
         })
     };
 
     set_roles (roles: string[]): Promise<boolean> {
         return new Promise(async (resolve, _) => {
-            await this.db.exec(sqlite_usr_update(this.host, this.uid, [ "roles" ]), roles.join(":"));
+            await this.db.exec(sqlite_usr_update(this.host, this.uid, [[ "roles", roles.join(":") ]]));
             resolve(true)
         })
     };
@@ -97,7 +98,7 @@ export class AxUsrDBSQLite implements AxUsrDB {
                 jti, iss: this.host,
                 sub: this.uid,
                 iat: creation.getTime(),
-                exp: ms(peremption.getTime() - creation.getTime()),
+                exp: (peremption.getTime() - creation.getTime()),
             }, process.env.AXJWTSECRET || this.uid, { algorithm: "HS512" });
 
             let raw: usr_Jeton_DBobj = {
@@ -107,7 +108,7 @@ export class AxUsrDBSQLite implements AxUsrDB {
             }
 
             // Mise en DB
-            await this.db.exec(sqlite_usr_jeton_add(this.host), jti, tk, agent, creation.getTime(), peremption.getTime(), this.uid);
+            await this.db.exec(sqlite_usr_jeton_add(this.host, jti, tk, agent, creation.getTime(), peremption.getTime(), this.uid));
 
             resolve(new usr_Jeton(raw, this));
         })
@@ -143,9 +144,9 @@ export function sqlite_parse_usr (u: sqlite_raw_usr): usr_DBobj {
         id: u.id,
         email: u.email,
         naissance: new Date(u.naissance),
-        photo: u.photo,
-        nom: u.nom,
-        prenom: u.prenom,
+        photo: u.photo || "",
+        nom: u.nom || "",
+        prenom: u.prenom || "",
         //privé
         mdp_hash: u.mdp_hash,
         roles: (u.roles || '').split(":"),
@@ -153,11 +154,11 @@ export function sqlite_parse_usr (u: sqlite_raw_usr): usr_DBobj {
 }
 
 
-export const sqlite_select_usr = (h: string) => 
-    `SELECT * FROM d_${h}_utilisateurs WHERE uid = "?";`;
+export const sqlite_select_usr = (h: string, uid: string) => 
+    `SELECT * FROM d_${h}_utilisateurs WHERE uid = "${uid}" OR id = "${uid}";`;
 
-export const sqlite_usr_update = (h: string, uid: string, f: string[]) => 
-    `UPDATE d_${h}_utilisateurs_jetons SET ${ f.join(' = ?, ') } WHERE uid = "${uid}";`;
+export const sqlite_usr_update = (h: string, uid: string, f: [string, string][]) => 
+    `UPDATE d_${h}_utilisateurs SET ${ f.map(e => e[0] + ' = "' + e[1] + '"').join(', ') } WHERE uid = "${uid}";`;
 
 export type sqlite_usr_Jeton_DBobj = {
     jti: string,
@@ -171,15 +172,16 @@ export function sqlite_usr_jeton_parse (i: sqlite_usr_Jeton_DBobj): usr_Jeton_DB
         jti: i.jti, agent: i.agent, creation: new Date(i.creation), jeton: i.jeton, peremption: new Date(i.peremption)
     }
 }
-export const sqlite_usr_jetons_select = (h: string) => 
-    `SELECT * FROM d_${h}_utilisateurs_jetons WHERE uid = "?";`;
+export const sqlite_usr_jetons_select = (h: string, uid: string) => 
+    `SELECT * FROM d_${h}_utilisateurs_jetons WHERE uid = "${uid}";`;
 
     
-export const sqlite_usr_jeton_select = (h: string) => 
-    `SELECT * FROM d_${h}_utilisateurs_jetons WHERE jti = "?";`;
+export const sqlite_usr_jeton_select = (h: string, jti: string) => 
+    `SELECT * FROM d_${h}_utilisateurs_jetons WHERE jti = "${jti}";`;
 
-export const sqlite_usr_jeton_add = (h: string) => 
-    `INSERT INTO d_${h}_utilisateurs_jetons (jti, jeton, agent, creation, peremption, uid) VALUES ("?", "?", "?", ?, ?, "?");`;
+export const sqlite_usr_jeton_add = (h: string, jti: string, jeton: string, agent: string, creation: number, peremption: number, uid: string) => 
+    `INSERT INTO d_${h}_utilisateurs_jetons (jti, jeton, agent, creation, peremption, uid) 
+            VALUES ("${jti}", "${jeton}", "${agent}", ${creation}, ${peremption}, "${uid}");`;
 
 export const sqlite_usr_jeton_rm = (h: string) => 
     `DELETE FROM d_${h}_utilisateurs_jetons WHERE jti = "?";`;

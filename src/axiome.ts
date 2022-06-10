@@ -26,7 +26,7 @@ export type AxVersion = { nom: string; annee: string; mois: string; jour: string
 
 export const VERSION: AxVersion = { 
     annee: "2022", mois: "06", jour: "05", 
-    nom: "Nihil", surnom: "Green Bike Co.", 
+    nom: "Nihil", surnom: "E-Cars", 
     suffixe: "prealpha",
     court: function () { return `${this.annee}.${this.mois}.${this.jour}${this.suffixe ? "." + this.suffixe : ""}` },
     long: function () { return `Axiome-(${this.nom}, ${this.surnom})-${this.court()}` },

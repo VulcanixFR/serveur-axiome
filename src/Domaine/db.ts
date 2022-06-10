@@ -6,5 +6,6 @@ export interface AxDmnDB {
 
     utilisateurs (): Promise<number>;
     utilisateur (uid: string): Promise<Utilisateur|undefined>;
+    utilisateur (id: string): Promise<Utilisateur|undefined>;
     
 }

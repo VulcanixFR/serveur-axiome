@@ -31,10 +31,10 @@ export class AxDmnDBSQlite implements AxDmnDB {
     utilisateur(uid: string): Promise<Utilisateur|undefined> {
         return new Promise (async (resolve, _) => {
             try {
-                let raw = await this.db.get<sqlite_raw_usr>(sqlite_select_usr(this.host), uid);
+                let raw = await this.db.get<sqlite_raw_usr>(sqlite_select_usr(this.host, uid));
                 if (!raw) return resolve(undefined);
                 let db_obj = sqlite_parse_usr(raw);
-                let usrdb = new AxUsrDBSQLite(this.db, this.host, uid);
+                let usrdb = new AxUsrDBSQLite(this.db, this.host, db_obj.uid);
                 resolve(new Utilisateur(db_obj, usrdb));
             } catch (error) {
                 console.trace(error);
