@@ -97,7 +97,8 @@ const table_domaine_utilisateur = `CREATE TABLE d_$1_utilisateurs (
 `;
 
 const table_domaine_utilisateur_jetons = `CREATE TABLE d_$1_utilisateurs_jetons (
-    jeton TEXT PRIMARY KEY,
+    jti TEXT PRIMARY KEY,
+    jeton TEXT NOT NULL,
     agent TEXT,
     creation INTEGER NOT NULL,
     peremption INTEGER NOT NULL,

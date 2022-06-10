@@ -1,6 +1,6 @@
-import * as jose from "jose";
 import { v4, validate, version } from "uuid";
 import { AxUsrDB } from "./db";
+import ms from "ms";
 
 export type usr_AUTH_UID = [ string, string, string ]; // [ uid, jeton, hote ]
 
@@ -23,8 +23,6 @@ export type usr_DBobj = {
 };
 
 export class Utilisateur {
-
-    private jetons: usr_Jeton[] = [];
 
     constructor (private db_obj: usr_DBobj, private db: AxUsrDB) {
         
@@ -71,10 +69,14 @@ export class Utilisateur {
      * @param mdp: mot de passe
      * @returns Jeton de connextion (ou undefined)
      */
-    async connecte (mdp: string): Promise<usr_Jeton | undefined> {
+    async connecte (mdp: string, agent: string): Promise<usr_Jeton | undefined> {
         if (this.db_obj.mdp_hash != mdp) return undefined;
 
-        return undefined
+        let c = new Date()
+        let p = new Date(c.getTime() + ms("1w")) // Pourra être un paramètre Domaine dans le futur
+        let jeton = await this.db.add_jeton(agent, c, p);
+
+        return jeton;
     }
 
     /**
@@ -82,13 +84,12 @@ export class Utilisateur {
      * @param jeton (JWT)
      * @returns Le jeton est valide et appartient à l'utilisateur
      */
-    verifie (jeton: string): boolean {
-
-        return false
+    async verifie (jeton: string): Promise<boolean> {
+        let J = await this.db.jeton(jeton);
+        if (J) return J.est_valide();
+        return false;
     }
     
-
-
     //Statique
     static gen_uid (): string {
         return "u:" + v4();
@@ -101,6 +102,7 @@ export class Utilisateur {
 
 
 export type usr_Jeton_DBobj = {
+    jti: string;
     jeton: string;
     agent: string;
     creation: Date;
@@ -142,7 +144,7 @@ export class usr_Jeton {
      * Va révoquer le jeton - soit le supprimer de la base de données.
      */
     revoque (): void {
-
+        this.db.rm_jeton(this.jeton);
     }
 
 }

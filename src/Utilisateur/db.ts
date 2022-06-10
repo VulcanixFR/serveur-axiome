@@ -6,7 +6,7 @@ export interface AxUsrDB {
 
     self (): Promise<usr_DBobj>;
     jetons (): Promise<usr_Jeton[]>;
-    jeton (j: string): Promise<usr_Jeton>;
+    jeton (jti: string): Promise<usr_Jeton>;
 
     //setters
     set_email: (email: string) => Promise<boolean>;
@@ -16,10 +16,10 @@ export interface AxUsrDB {
     set_roles: (roles: string[]) => Promise<boolean>;
 
     //Ajouts
-    add_jeton: (jeton: string, agent: string, creation: Date, peremption: Date) => Promise<boolean>;
+    add_jeton: (agent: string, creation: Date, peremption: Date, scope?: any) => Promise<usr_Jeton>;
     
     //Enlève
-    rm_jeton: (jeton: string) => Promise<boolean>;
+    rm_jeton: (jti: string) => Promise<boolean>;
 
 }
 
