@@ -35,7 +35,7 @@ export class AxDmnDBSQlite implements AxDmnDB {
                 if (!raw) return resolve(undefined);
                 let db_obj = sqlite_parse_usr(raw);
                 let usrdb = new AxUsrDBSQLite(this.db, this.host, db_obj.uid);
-                resolve(new Utilisateur(db_obj, usrdb));
+                resolve(new Utilisateur(db_obj, usrdb, this.host));
             } catch (error) {
                 console.trace(error);
                 resolve(undefined);

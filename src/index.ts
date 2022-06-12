@@ -2,7 +2,6 @@ import express from 'express';
 import { transaction_middleware } from './Transaction/transaction';
 import { initAxiome } from './axiome';
 import { domaine_middleware } from './Domaine/domaine';
-import bodyParser from "body-parser";
 
 const App = express();
 console.log("Bonjour !");
@@ -10,8 +9,6 @@ console.log("Bonjour !");
 (async () => {
 
     const Axiome = await initAxiome();
-
-    // App.use(bodyParser);
 
     App.use((req, res, next) => {
         req.axiome = Axiome;

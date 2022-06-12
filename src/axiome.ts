@@ -6,12 +6,15 @@ import { AxDBSQLite } from "./Base de données/sqlite";
 import { Domaine } from "./Domaine/domaine";
 import { usr_AUTH_UID, Utilisateur } from "./Utilisateur/utilisateur";
 
+export const DEF_SECRET = "Frites_au four ! XD @sel"
+
 // Déclaration
 declare global {
     namespace Express {
         export interface Request {
+            client?: Utilisateur;
             utilisateur?: Utilisateur;
-            auth?: usr_AUTH_UID | app_AUTH_AID;
+            // auth?: usr_AUTH_UID | app_AUTH_AID;
             domaine: Domaine;
             axiome: Axiome;
         }

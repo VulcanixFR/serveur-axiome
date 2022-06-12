@@ -4,6 +4,7 @@ import { AxUsrDB } from "./db";
 import { usr_DBobj, usr_Jeton, usr_Jeton_DBobj } from "./utilisateur";
 import jwt from "jsonwebtoken";
 import ms from "ms";
+import { DEF_SECRET } from "../axiome";
 
 
 export class AxUsrDBSQLite implements AxUsrDB {
@@ -89,6 +90,15 @@ export class AxUsrDBSQLite implements AxUsrDB {
         })
     };
 
+    async set_pseudo(pseudo: string): Promise<boolean> {
+        try {
+            await this.db.exec(sqlite_usr_update(this.host, this.uid, [[ "pseudo", pseudo ]]));
+        } catch (e) {
+            return false;
+        }
+        return true
+    }
+
 
     add_jeton (agent: string, creation: Date, peremption: Date, scope?: any): Promise<usr_Jeton> {
         return new Promise(async (resolve, _) => {
@@ -99,7 +109,7 @@ export class AxUsrDBSQLite implements AxUsrDB {
                 sub: this.uid,
                 iat: creation.getTime(),
                 exp: (peremption.getTime() - creation.getTime()),
-            }, process.env.AXJWTSECRET || this.uid, { algorithm: "HS512" });
+            }, process.env.AXJWTSECRET || DEF_SECRET, { algorithm: "HS512" });
 
             let raw: usr_Jeton_DBobj = {
                 jti, jeton: tk,
@@ -133,6 +143,7 @@ export type sqlite_raw_usr = {
     photo: string;
     nom: string;
     prenom: string;
+    pseudo: string;
     //privé
     mdp_hash: string;
     roles: string;
@@ -147,6 +158,7 @@ export function sqlite_parse_usr (u: sqlite_raw_usr): usr_DBobj {
         photo: u.photo || "",
         nom: u.nom || "",
         prenom: u.prenom || "",
+        pseudo: u.pseudo,
         //privé
         mdp_hash: u.mdp_hash,
         roles: (u.roles || '').split(":"),

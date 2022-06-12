@@ -89,6 +89,7 @@ const table_domaine_utilisateur = `CREATE TABLE d_$1_utilisateurs (
     email TEXT NOT NULL,
     naissance INTEGER NOT NULL,
     prenom TEXT NOT NULL,
+    pseudo TEXT,
     nom TEXT,
     photo TEXT,
     mdp_hash TEXT,

@@ -17,6 +17,7 @@ export type usr_DBobj = {
     photo: string;
     nom: string;
     prenom: string;
+    pseudo: string;
     //privé
     mdp_hash: string;
     roles: string[]
@@ -24,7 +25,7 @@ export type usr_DBobj = {
 
 export class Utilisateur {
 
-    constructor (private db_obj: usr_DBobj, private db: AxUsrDB) {
+    constructor (private db_obj: usr_DBobj, private db: AxUsrDB, private host: string) {
         
     }
 
@@ -64,6 +65,10 @@ export class Utilisateur {
         return [this.db_obj.nom, this.db_obj.prenom].join(" ");
     }
 
+    get pseudo () {
+        return this.db_obj.pseudo;
+    }
+
 
     /**
      * Donne les informations brutes de l'utilisateur
@@ -78,7 +83,8 @@ export class Utilisateur {
             roles: this.roles,
             nom: this.nom,
             prenom: this.prenom,
-            patronyme: this.patronyme
+            patronyme: this.patronyme,
+            pseudo: this.pseudo
         }
     }
     /**

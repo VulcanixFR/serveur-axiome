@@ -14,6 +14,7 @@ export interface AxUsrDB {
     set_photo: (photo: string) => Promise<boolean>;
     set_mdp: (hash: string) => Promise<boolean>;
     set_roles: (roles: string[]) => Promise<boolean>;
+    set_pseudo (pseudo: string): Promise<boolean>;
 
     //Ajouts
     add_jeton: (agent: string, creation: Date, peremption: Date, scope?: any) => Promise<usr_Jeton>;
