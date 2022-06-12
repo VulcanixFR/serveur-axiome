@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { verify } from "jsonwebtoken";
+import { JwtPayload, verify } from "jsonwebtoken";
+import Application from "../Application/application";
 import { DEF_SECRET } from "../axiome";
 import { Utilisateur } from "./utilisateur";
 
@@ -21,7 +22,7 @@ function auth (req: Request, res: Response, next: NextFunction) {
     
             }
             if (decoded) {
-
+                decoded = <JwtPayload>decoded;
                 let sub = <string>decoded.sub;
                 if (!sub) {
                     res.status(401).transaction("Jeton invalide.")
@@ -32,9 +33,11 @@ function auth (req: Request, res: Response, next: NextFunction) {
                     req.client = await req.domaine.utilisateur(sub);
                     
                     if (!req.client) return res.status(400).transaction("Client introuvable.");
+                    if (!req.client.verifie(decoded.jti || "")) return res.status(400).transaction("Jeton expiré.")
                     next();
-                } else if (false) {
+                } else if (Application.est_aid(sub)) {
                     // Application
+                    next();
                 } else {
                     res.status(400).transaction("Identité invalide.");
                     return;
@@ -52,12 +55,18 @@ function auth (req: Request, res: Response, next: NextFunction) {
 
 }
 
+async function confiramtion_utilisateur (req: Request, res: Response, next: NextFunction) {
+
+
+
+}
+
 async function get_utilisateur (req: Request, res: Response, next: NextFunction) {
 
     if (!req.params.uid || !req.client) 
         return res.status(418).transaction("Ce n'était pas censé arriver :/");
 
-    if (req.client.uid && req.client.uid != req.params.uid) 
+    if (req.client._ax_type == "Utilisateur" && req.client.uid != req.params.uid) 
         return res.status(403).transaction("Vous ne pouvez pas atteindre les informations d'un autre.");
 
     req.utilisateur = await req.domaine.utilisateur(req.params.uid);
@@ -82,8 +91,9 @@ RU.get("/i/dispo/email/:email", TODO);
 RU.get("/i/dispo/code/:code", TODO); //i.e. l'utilisateur peut utiliser le code d'invitation
 
 // Connexion
-RU.post("/c", TODO); // Connexion
+RU.post("/c", TODO); // Connexion - Renvoie le jwt à l'utilisateur
 RU.get('/c/valide', TODO); // Permet de vérifier l'état du jeton actuel
+RU.get('/c/:jti', TODO); // Permet à l'application externe de récupérer le jwt
 
 // Publique
 RU.get("/pub/:uid", TODO); // Infos publiques { pseudo: pseudo || patronyme, id, photo }
@@ -98,6 +108,8 @@ RU.get('/:uid', get_utilisateur, (req, res) => {
     res.transaction(usr.brut);
 });
 
+RU.get("/:uid/connexions", TODO);
+
 //Recherche partielle 
 RU.get("/r/:id", TODO)
 
@@ -110,13 +122,21 @@ RU.get("/r/:id/uid", async (req, res) => {
     res.transaction(usr.uid);
 });
 
-// Vérification
-
-
 // Suppression
-
+RU.delete("/:uid", TODO);
 
 // Modification
+RU.post("/:uid/email", TODO);
+
+RU.post("/:uid/naissance", TODO);
+
+RU.post("/:uid/photo", TODO);
+
+RU.post("/:uid/mdp", TODO);
+
+RU.post("/:uid/role/:role", TODO);
+RU.delete("/:uid/role/:role", TODO);
+
 
 
 export default RU;

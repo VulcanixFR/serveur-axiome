@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
-import { app_AUTH_AID } from "../Application/application";
+import { Application, app_AUTH_AID } from "../Application/application";
 import { AxVersion } from "../axiome";
 import { Domaine } from "../Domaine/domaine";
 import { usr_AUTH_UID, Utilisateur } from "../Utilisateur/utilisateur";
@@ -23,7 +23,7 @@ type transaction<T> = {
     valeur: T
 };
 
-export default function Transaction<T> (valeur: T, domaine: Domaine, version: AxVersion, pour?: Utilisateur): transaction<T> {
+export default function Transaction<T> (valeur: T, domaine: Domaine, version: AxVersion, pour?: Utilisateur | Application): transaction<T> {
     if (pour === undefined) {
         return {
             "@axiome": {
@@ -34,7 +34,7 @@ export default function Transaction<T> (valeur: T, domaine: Domaine, version: Ax
     }
     return {
         "@axiome": {
-            cree: new Date(), version, pour: pour.uid , domaine: domaine.host, decoration: domaine.decoration
+            cree: new Date(), version, pour: (pour._ax_type == "Utilisateur" ? pour.uid : pour.aid), domaine: domaine.host, decoration: domaine.decoration
         },
         valeur
     }

@@ -1,6 +1,7 @@
 import { v4, validate, version } from "uuid";
 import { AxUsrDB } from "./db";
 import ms from "ms";
+import { SHA256 } from "crypto-js";
 
 export type usr_AUTH_UID = [ string, string, string ]; // [ uid, jeton, hote ]
 
@@ -24,6 +25,8 @@ export type usr_DBobj = {
 };
 
 export class Utilisateur {
+    
+    readonly _ax_type = "Utilisateur";
 
     constructor (private db_obj: usr_DBobj, private db: AxUsrDB, private host: string) {
         
@@ -93,7 +96,7 @@ export class Utilisateur {
      * @returns Jeton de connextion (ou undefined)
      */
     async connecte (mdp: string, agent: string): Promise<usr_Jeton | undefined> {
-        if (this.db_obj.mdp_hash != mdp) return undefined;
+        if (!this.pass(mdp)) return undefined;
 
         let c = new Date()
         let p = new Date(c.getTime() + ms("1w")) // Pourra être un paramètre Domaine dans le futur
@@ -113,12 +116,16 @@ export class Utilisateur {
         return false;
     }
 
+    pass (mdp: string) {
+        return this.db_obj.mdp_hash != SHA256(mdp).toString(CryptoJS.enc.Utf8);
+    }
+
     set_email (email: string) { return this.db.set_email(email) }
     set_naissance (date: Date) { return this.db.set_naissance(date) }
     set_photo (photo: string) { return this.db.set_photo(photo) }
 
     set_mdp (clair: string) {
-        let hash = clair;
+        let hash = SHA256(clair).toString(CryptoJS.enc.Utf8);
         return this.db.set_mdp(hash);
     }
     
@@ -131,6 +138,10 @@ export class Utilisateur {
     suppr_role (role: string) {
         this.db_obj.roles = this.db_obj.roles.filter(e => e != role);
         return this.db.set_roles(this.db_obj.roles);
+    }
+
+    supprime () { // A faire - Supprime l'utilisateur de la base de données
+
     }
 
     async connexions () {

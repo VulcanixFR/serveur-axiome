@@ -2,6 +2,7 @@ import express from 'express';
 import { transaction_middleware } from './Transaction/transaction';
 import { initAxiome } from './axiome';
 import { domaine_middleware } from './Domaine/domaine';
+import RouteurUtilisateur from './Utilisateur/router';
 
 const App = express();
 console.log("Bonjour !");
@@ -21,6 +22,8 @@ console.log("Bonjour !");
     App.get("/", (req, res, next) => { 
         res.transaction("Oui.")
     })
+
+    App.use("/utilisateur", RouteurUtilisateur);
 
     App.get('/test/admin', async (req, res, next) => {
         let admin = await req.domaine.utilisateur(req.domaine.admin_id);

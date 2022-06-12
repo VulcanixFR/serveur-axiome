@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Utilisateur</title>
+
+    <style>
+
+        body {
+            --accent: #cc0077;
+            accent-color: var(--accent);
+            display: grid;
+            grid-template-columns: auto;
+            grid-template-rows: auto auto;
+            gap: 10px;
+            background-color: #16161d;
+            font-family: sans-serif;
+            color: whitesmoke;
+        }
+
+        .params {
+            display: block;
+            box-sizing: border-box;
+            padding: 10px;
+            border-radius: 4px;
+            /* border: 2px solid var(--accent); */
+            background-color: hsla(240, 14%, 20%, 1);
+            box-shadow: 1px 1px 10px -1px black;
+        }
+
+        .params input {
+            width: 100%;
+            margin: 2px 0;
+            height: 20px;
+            box-sizing: border-box;
+            border: none;
+            border-bottom: 2px solid var(--accent);
+            background-color: transparent;
+            color: whitesmoke;
+            transition: all ease .25s;
+            font-size: 12pt;
+            font-weight: bold;
+        }
+
+        .params input:focus {
+            border-bottom: 2px solid var(--accent);
+            outline: none;
+        }
+
+        .tests {
+            /* display: grid;
+            grid-auto-columns: 300px;
+            gap: 5px;
+            grid-auto-rows: 500px;
+            width: 100%;
+            box-sizing: border-box; */
+            display: flex;
+            width: 100%;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .test {
+            display: block;
+            /* height: 300px; */
+            width: 500px;
+            background-color: hsla(240, 14%, 20%, 1);
+            box-shadow: 1px 1px 10px -1px black;
+            padding: 10px;
+            box-sizing: border-box;
+            border-radius: 4px;
+        }
+
+        .test h1 {
+            margin: 2px 0;
+            font-size: 18pt;
+            width: 100%;
+            border-bottom: 2px var(--accent) solid;
+        }
+        .test p {
+            margin: 5px 4px;
+            font-size: 12pt;
+            font-weight: normal;
+            /* border-bottom: var(--accent) 1px solid; */
+        }
+        .test p::before {
+            content: attr(data-code);
+            padding: 2px 0 0 0;
+            background-color: var(--accent);
+            margin: 0 5px 0 0;
+            height: 100%;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 10pt;
+            text-align: center;
+            width: 35px;
+        }
+
+        .test pre {
+            background-color: hsla(240, 14%, 15%, 1);
+            padding: 5px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+
+        .test button {
+            width: 100%;
+            background-color: transparent;
+            color: whitesmoke;
+            border: none;
+            background-color: hsla(240, 14%, 15%, 1);
+            padding: 5px;
+            font-size: 12pt;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all ease .1s;
+        }
+        .test button:hover {
+            background-color: hsla(240, 14%, 16%, 1);
+        }
+        .test button:active {
+            background-color: hsla(240, 14%, 14%, 1);
+        }
+        .test button:disabled {
+            background-color: #333;
+            color: #555;
+        }
+
+        .bleu { --accent: #0482ff }
+        .rouge { --accent: red }
+        .vert { --accent: green }
+        .orange { --accent: orange }
+
+    </style>
+
+</head>
+<body>
+    
+    <span class="params">
+        <input type="text" id="srv" placeholder="Serveur" value="http://localhost:4200">
+        <input type="text" id="uid" placeholder="ID Utilisateur">
+        <input type="text" id="ctk" placeholder="Jeton Client">
+    </span>
+
+    <span class="tests">
+
+        <div class="test">
+            <h1>Titre</h1>
+
+            <p class="bleu url" data-code="URL">/test/admin</p>
+            
+            <p class="http rouge" data-code="?">...</p>
+            <code><pre></pre></code>
+            <button>Test</button>
+        </div>
+
+        <div class="test">
+            <h1>Titre</h1>
+
+            <p class="bleu url" data-code="URL">/utilisateur/$uid</p>
+            
+            <p class="http rouge" data-code="?">...</p>
+            <code><pre></pre></code>
+            <button>Test</button>
+        </div>
+
+
+        
+    </span>
+
+    <!-- Script :D -->
+    <script>
+
+        const params = document.querySelectorAll(".params input");
+        const tests = document.querySelectorAll("div.test");
+
+        const etat = {
+            srv: params[0].value,
+            uid: params[1].value,
+            ctk: params[2].value
+        }
+
+        tests.forEach(div => {
+
+            let btn = div.querySelector("button");
+            let inputs = div.querySelectorAll("input");
+            let p = div.querySelector("p.url");
+            let stat = div.querySelector('p.http');
+            let code = div.querySelector("pre")
+            
+            const txt = p.innerText;
+
+            div.url = txt;
+            div.nouv = etat => { 
+                let keys = Object.keys(etat);
+                let out = txt;
+                for (let k of keys) {
+                    out = out.replace("$" + k, etat[k] || "<" + k + ">");
+                }
+                div.url = out;
+                p.innerText = out;
+            }
+
+            btn.onclick = async () => {
+                                
+                let res = await fetch(url).catch(e => {
+                    console.error(e);
+                    
+                });
+                p.style.color = (res.status >= 400 ? "red" : 'green');
+
+                let out = await res.json();
+                console.log(out)
+                code.innerHTML = JSON.stringify(out.valeur, undefined, 4);
+
+            }
+
+            div.nouv(etat)
+
+        })
+        
+        params.forEach(p => {
+            p.onkeyup = p.onchange = () => {
+                etat[p.id] = p.value;
+                tests.forEach(t => t.nouv(etat))
+            }
+        });
+
+
+    </script>
+
+</body>
+</html>

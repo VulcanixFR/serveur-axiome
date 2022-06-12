@@ -1,6 +1,6 @@
 import { open } from "sqlite";
 import { Database } from "sqlite3";
-import { app_AUTH_AID } from "./Application/application";
+import axapp, { app_AUTH_AID } from "./Application/application";
 import { AxDB } from "./Base de données/database";
 import { AxDBSQLite } from "./Base de données/sqlite";
 import { Domaine } from "./Domaine/domaine";
@@ -12,7 +12,7 @@ export const DEF_SECRET = "Frites_au four ! XD @sel"
 declare global {
     namespace Express {
         export interface Request {
-            client?: Utilisateur;
+            client?: Utilisateur | axapp;
             utilisateur?: Utilisateur;
             // auth?: usr_AUTH_UID | app_AUTH_AID;
             domaine: Domaine;
