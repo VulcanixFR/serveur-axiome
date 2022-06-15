@@ -10,10 +10,11 @@ const RU: Router = Router();
 function auth (req: Request, res: Response, next: NextFunction) {
 
     let header = req.headers.authorization;
-    let erreur = () => res.status(401).transaction("Demande invalide.");
+    let erreur = (msg: string) => res.status(401).transaction("Demande invalide: " + msg + ".");
 
     if (header) {
         let token = header.split(" ")[1];
+
         verify(token, process.env.AXJWTSECRET || DEF_SECRET, async (err, decoded) => {
             if (err) {
 
@@ -34,24 +35,24 @@ function auth (req: Request, res: Response, next: NextFunction) {
                     
                     if (!req.client) return res.status(400).transaction("Client introuvable.");
                     if (!req.client.verifie(decoded.jti || "")) return res.status(400).transaction("Jeton expiré.")
-                    next();
+                    return next();
                 } else if (Application.est_aid(sub)) {
                     // Application
-                    next();
+                    req.client = undefined;
+                    
+                    return next();
                 } else {
                     res.status(400).transaction("Identité invalide.");
                     return;
                 }
     
-                erreur();
             }
     
-            erreur();
+            erreur("JWT non décodé");
     
         });
-    }
 
-    erreur();
+    } else return erreur("Pas de header");
 
 }
 

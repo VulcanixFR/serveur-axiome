@@ -1,7 +1,7 @@
 import { v4, validate, version } from "uuid";
 import { AxUsrDB } from "./db";
 import ms from "ms";
-import { SHA256 } from "crypto-js";
+import CryptoJS, { SHA256 } from "crypto-js";
 
 export type usr_AUTH_UID = [ string, string, string ]; // [ uid, jeton, hote ]
 
@@ -65,7 +65,7 @@ export class Utilisateur {
     }
 
     get patronyme () {
-        return [this.db_obj.nom, this.db_obj.prenom].join(" ");
+        return this.db_obj.nom ? [this.db_obj.nom || undefined, this.db_obj.prenom].join(" ") : this.prenom;
     }
 
     get pseudo () {
@@ -117,7 +117,7 @@ export class Utilisateur {
     }
 
     pass (mdp: string) {
-        return this.db_obj.mdp_hash != SHA256(mdp).toString(CryptoJS.enc.Utf8);
+        return this.db_obj.mdp_hash == SHA256(mdp).toString(CryptoJS.enc.Hex);
     }
 
     set_email (email: string) { return this.db.set_email(email) }
@@ -125,7 +125,7 @@ export class Utilisateur {
     set_photo (photo: string) { return this.db.set_photo(photo) }
 
     set_mdp (clair: string) {
-        let hash = SHA256(clair).toString(CryptoJS.enc.Utf8);
+        let hash = SHA256(clair).toString(CryptoJS.enc.Hex);
         return this.db.set_mdp(hash);
     }
     

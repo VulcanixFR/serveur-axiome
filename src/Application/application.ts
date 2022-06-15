@@ -12,11 +12,11 @@ export class Application {
     }
 
     static gen_aid (): string {
-        return "u:" + v4();
+        return "a:" + v4();
     }
     static est_aid (str: string): boolean {
         let s = str.split(':');
-        return s[0] === "u" && validate(s[1]) && version(s[1]) == 4;
+        return s[0] === "a" && validate(s[1]) && version(s[1]) == 4;
     }
 
 }

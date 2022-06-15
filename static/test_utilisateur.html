@@ -5,6 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Utilisateur</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js" integrity="sha512-yUUc0qWm2rhM7X0EFe82LNnv2moqArj5nro/w1bi05A09hRVeIZbN6jlMoyu0+4I/Bu4Ck/85JQIU82T82M28w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/vs2015.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
 
@@ -72,6 +74,7 @@
             padding: 10px;
             box-sizing: border-box;
             border-radius: 4px;
+            height: max-content;
         }
 
         .test h1 {
@@ -87,7 +90,7 @@
             /* border-bottom: var(--accent) 1px solid; */
         }
         .test p::before {
-            content: attr(data-code);
+            content: attr(data-pre);
             padding: 2px 0 0 0;
             background-color: var(--accent);
             margin: 0 5px 0 0;
@@ -105,6 +108,10 @@
             box-sizing: border-box;
             border-radius: 4px;
             margin: 5px 0;
+            overflow: auto;
+            font-family: "Cascadia Code", monospace;
+            font-size: 10pt;
+            font-weight: normal;
         }
 
         .test button {
@@ -142,29 +149,49 @@
     
     <span class="params">
         <input type="text" id="srv" placeholder="Serveur" value="http://localhost:4200">
-        <input type="text" id="uid" placeholder="ID Utilisateur">
-        <input type="text" id="ctk" placeholder="Jeton Client">
+        <input type="text" id="uid" placeholder="ID Utilisateur" value="u:d65c6e60-7db3-4c57-9bf2-afde3177ebe2">
+        <input type="text" id="ctk" placeholder="Jeton Client" value="eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjOGY1YTA1Mi1jMDkzLTRlZTItYmNiOC02ZTQwZTg3Y2FjYzYiLCJpc3MiOiJsb2NhbGhvc3QiLCJzdWIiOiJ1OmQ2NWM2ZTYwLTdkYjMtNGM1Ny05YmYyLWFmZGUzMTc3ZWJlMiIsImlhdCI6MTY1NTI5NDMzMTQzMywiZXhwIjoxNjU1ODk5MTMxNDMzfQ.md3ZyHxFUWFYnCmHEuwE7oElU5MvI2Ej2w0jsv1LMywK7hyjFE-UutTfi-1ppzk53cGoCjJnC876Y6Baa7ziCw">
     </span>
 
     <span class="tests">
 
         <div class="test">
-            <h1>Titre</h1>
+            <h1>Admin</h1>
 
-            <p class="bleu url" data-code="URL">/test/admin</p>
+            <p class="bleu url" data-pre="GET">/test/admin</p>
             
-            <p class="http rouge" data-code="?">...</p>
-            <code><pre></pre></code>
+            <p class="http rouge" data-pre="?">...</p>
+            <code><pre class="hljs language-json"></pre></code>
             <button>Test</button>
         </div>
 
         <div class="test">
-            <h1>Titre</h1>
+            <h1>Jetons</h1>
 
-            <p class="bleu url" data-code="URL">/utilisateur/$uid</p>
+            <p class="bleu url" data-pre="GET">/test/$uid/jetons</p>
             
-            <p class="http rouge" data-code="?">...</p>
-            <code><pre></pre></code>
+            <p class="http rouge" data-pre="?">...</p>
+            <code><pre class="hljs language-json"></pre></code>
+            <button>Test</button>
+        </div>
+
+        <div class="test">
+            <h1>Utilisateur</h1>
+
+            <p class="bleu url" data-pre="GET">/utilisateur/$uid</p>
+            
+            <p class="http rouge" data-pre="?">...</p>
+            <code><pre class="hljs language-json"></pre></code>
+            <button>Test</button>
+        </div>
+
+        <div class="test">
+            <h1>Infos Publiques</h1>
+
+            <p class="bleu url" data-pre="GET">/utilisateur/pub/$uid</p>
+            
+            <p class="http rouge" data-pre="?">...</p>
+            <code><pre class="hljs language-json"></pre></code>
             <button>Test</button>
         </div>
 
@@ -190,7 +217,7 @@
             let inputs = div.querySelectorAll("input");
             let p = div.querySelector("p.url");
             let stat = div.querySelector('p.http');
-            let code = div.querySelector("pre")
+            let pre = div.querySelector("pre")
             
             const txt = p.innerText;
 
@@ -206,16 +233,32 @@
             }
 
             btn.onclick = async () => {
+
+                let headers = etat.ctk ? {
+                    "Authorization": "Bearer " + etat.ctk,
+                } : {};
                                 
-                let res = await fetch(url).catch(e => {
+                let res = await fetch(div.url, {
+                    headers
+                }).catch(e => {
                     console.error(e);
                     
                 });
-                p.style.color = (res.status >= 400 ? "red" : 'green');
+                
+                stat.className = "url " + (res.status >= 400 ? (res.status >= 500 ? 'orange' : "rouge") : 'vert');
+                stat.dataset.pre = res.status;
+                stat.innerText = res.statusText;
 
                 let out = await res.json();
                 console.log(out)
-                code.innerHTML = JSON.stringify(out.valeur, undefined, 4);
+                // pre.innerText = JSON.stringify(out.valeur, undefined, 4);
+                // hljs.highlightElement(pre)
+
+                let axd = out['@axiome'].decoration;
+                if (axd.accentuation) document.body.style.setProperty("--accent", axd.accentuation);
+
+                let txt = JSON.stringify(out.valeur, undefined, 4);
+                pre.innerHTML = hljs.highlight("json", txt).value;
 
             }
 

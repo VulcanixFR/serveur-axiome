@@ -108,7 +108,7 @@ export class AxUsrDBSQLite implements AxUsrDB {
                 jti, iss: this.host,
                 sub: this.uid,
                 iat: creation.getTime(),
-                exp: (peremption.getTime() - creation.getTime()),
+                exp: peremption.getTime(),
             }, process.env.AXJWTSECRET || DEF_SECRET, { algorithm: "HS512" });
 
             let raw: usr_Jeton_DBobj = {
@@ -161,7 +161,7 @@ export function sqlite_parse_usr (u: sqlite_raw_usr): usr_DBobj {
         pseudo: u.pseudo,
         //privé
         mdp_hash: u.mdp_hash,
-        roles: (u.roles || '').split(":"),
+        roles: (u.roles || '').split(":").filter(e => e),
     }
 }
 
