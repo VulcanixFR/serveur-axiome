@@ -34,7 +34,7 @@ function auth (req: Request, res: Response, next: NextFunction) {
                     req.client = await req.domaine.utilisateur(sub);
                     
                     if (!req.client) return res.status(400).transaction("Client introuvable.");
-                    if (!req.client.verifie(decoded.jti || "")) return res.status(400).transaction("Jeton expiré.")
+                    if (!req.client.verifie(decoded.jti || "")) return res.status(498).transaction("Jeton expiré.")
                     return next();
                 } else if (Application.est_aid(sub)) {
                     // Application

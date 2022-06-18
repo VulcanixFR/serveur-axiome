@@ -6,3 +6,7 @@ dist/*
 .env
 tsconfig.tsbuildinfo
 *.sqlite
+static
+static/*
+.pnpm-debug.log
+db.sqlite

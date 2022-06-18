@@ -1,7 +1,8 @@
 import { Database } from "sqlite";
+import { rm_domaine_db } from "../Base de données/sqlite";
 import { AxUsrDBSQLite, sqlite_parse_usr, sqlite_raw_usr, sqlite_select_usr } from "../Utilisateur/sqlite";
 import { usr_DBobj, Utilisateur } from "../Utilisateur/utilisateur";
-import { AxDmnDB } from "./db";
+import { AxDmnDB, dmn_inscr_mode, dmn_props } from "./db";
 
 export class AxDmnDBSQlite implements AxDmnDB {
 
@@ -43,9 +44,62 @@ export class AxDmnDBSQlite implements AxDmnDB {
         })
     }
 
+
+    async set_prop(prop: "alias", value: string[]): Promise<boolean>;
+    async set_prop(prop: "defaut", value: boolean): Promise<boolean>;
+    async set_prop(prop: "admin", value: string): Promise<boolean>;
+    async set_prop(prop: "inscription", value: dmn_inscr_mode): Promise<boolean>;
+    async set_prop(prop: "lieux", value: string[]): Promise<boolean>;
+    async set_prop(prop: "liste_noire", value: boolean): Promise<boolean>;
+    async set_prop(prop: "accentuation", value: string): Promise<boolean>;
+    async set_prop(prop: "image", value: string): Promise<boolean>;
+    async set_prop(prop: "titre", value: string): Promise<boolean>;
+    async set_prop(prop: "apropos", value: string): Promise<boolean>;
+    async set_prop(prop: "rootfs", value: string): Promise<boolean>;
+    async set_prop(prop: dmn_props, value: string | string[] | boolean): Promise<boolean> {
+        let tostore = "";
+        switch (prop) {
+            case "accentuation":
+            case "admin":
+            case "inscription":
+            case "image":
+            case "titre":
+            case "apropos":
+            case "rootfs":
+                tostore = '"' + <string>value + '"';
+                break;
+            case "alias":
+            case "lieux":
+                tostore = '"' + (<string[]>value).join(":") + '"';
+                break;
+            case "liste_noire":
+                tostore = (<boolean>value) ? '1' : '0';
+        }
+        try {
+            await this.db.exec(sqlite_update(this.host, prop, tostore));
+            return true;
+        } catch (err) {
+            console.trace(err);
+            return false;
+        }
+    }
+
+    async supprime(): Promise<boolean> {
+        
+        try {
+            await this.db.exec(rm_domaine_db(this.host));
+            return true;
+        } catch (err) {
+            console.trace(err);
+            return false;
+        }
+
+    }
+
 }
 
 const select_count = (h: string) => 
     `SELECT COUNT(*) FROM d_${h}_utilisateurs;`;
 
-
+const sqlite_update = (h: string, key: string, val: string) => 
+    `UPDATE domaines SET ${ key } = ${ val } WHERE host = "${h}";`;

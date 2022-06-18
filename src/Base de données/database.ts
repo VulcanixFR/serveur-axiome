@@ -7,4 +7,6 @@ export interface AxDB {
     domaines (): Promise<dmn_DBobj[]>;
     domaine (host: string): Promise<Domaine>;
 
+    nouv_domaine(host: string): Promise<{err:string} | {err: undefined, domaine: Domaine}>;
+
 }

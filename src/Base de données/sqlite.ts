@@ -1,4 +1,5 @@
 import { Database } from "sqlite";
+import { dmn_inscr_mode } from "../Domaine/db";
 import { dmn_DBobj, Domaine } from "../Domaine/domaine";
 import { AxDmnDBSQlite } from "../Domaine/sqlite";
 import { Utilisateur } from "../Utilisateur/utilisateur";
@@ -61,6 +62,28 @@ export class AxDBSQLite implements AxDB {
         })
     }
 
+    async nouv_domaine(host: string): Promise<{ err: string; } | { err: undefined; domaine: Domaine; }> {
+        
+        let dmns = await this.domaines();
+        let exists = dmns.filter(e => e.host == host);
+        if (exists.length) return { err: "Le domaine existe déjà." }
+
+        let neo = domaine_neo(host);
+        let tables = tables_domaine(host);
+        let admin = domaine_admin(host);
+
+        let req = neo + tables + admin;
+        
+        try {
+            await this.db.exec(req);
+            let dom = await this.domaine(host);
+            return {domaine: dom, err: undefined}
+        } catch (err: any) {
+            return { err: <string>err }
+        }
+
+    }
+
 }
 
 const table_liste = `SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name;`;
@@ -78,9 +101,11 @@ const table_domaine = `CREATE TABLE domaines (
     accentuation TEXT,
     image TEXT,
     titre TEXT,
-    apropos TEXT
+    apropos TEXT,
+    rootfs TEXT DEFAULT "static"
 );`;
 const domaine_localhost = `INSERT INTO domaines (host, alias, defaut) VALUES ("localhost", "127.0.0.1", 1);`;
+const domaine_neo = (host: string) => `INSERT INTO domaines (host) VALUES ("${host}");`;
 const domaine_admin = (host: string) => `INSERT INTO d_${host}_utilisateurs (uid, id, email, naissance, prenom) VALUES ("${Utilisateur.gen_uid()}", "admin", "${'admin@' + host}", ${Date.now()}, "Administrateur");`;
 
 const table_domaine_utilisateur = `CREATE TABLE d_$1_utilisateurs (
@@ -119,6 +144,12 @@ function tables_domaine (domaine: string) {
     return (table_domaine_utilisateur + table_domaine_utilisateur_jetons + table_domaine_inscription_codes).replace(/\$1/g, domaine);
 }
 
+export const rm_domaine_db = (host: string) => 
+    `DROP TABLE d_${host}_inscription_codes;
+    DROP TABLE d_${host}_utilisateurs_jetons;
+    DROP TABLE d_${host}_utilisateurs;
+    DELETE FROM domaines WHERE host = "${host}";`;
+
 type raw_dmn = {
     host: string;
     alias: string;
@@ -126,7 +157,7 @@ type raw_dmn = {
     admin: string;
 
     //Mode d'inscription
-    inscritption: 'ouvert' | 'code' | 'liste';
+    inscritption: dmn_inscr_mode;
 
     // Liste des domaines autorisés / bannis
     lieux: string;
@@ -137,6 +168,9 @@ type raw_dmn = {
     image: string;          //URL
     titre: string;
     apropos: string;
+
+    //Données statiques
+    rootfs: string;
 }
 
 function parse_dmn (d: raw_dmn): dmn_DBobj {
@@ -151,6 +185,7 @@ function parse_dmn (d: raw_dmn): dmn_DBobj {
         lieux: (d.lieux || '').split(":"),
         liste_noire: d.liste_noire == 1,
         titre: d.titre,
-        admin: d.admin
+        admin: d.admin,
+        rootfs: d.rootfs
     }
 }
