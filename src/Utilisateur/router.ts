@@ -33,8 +33,8 @@ function auth (req: Request, res: Response, next: NextFunction) {
                 if (Utilisateur.est_uid(sub)) {
                     req.client = await req.domaine.utilisateur(sub);
                     
-                    if (!req.client) return res.status(400).transaction("Client introuvable.");
-                    if (!req.client.verifie(decoded.jti || "")) return res.status(498).transaction("Jeton expiré.")
+                    if (!req.client) return res.status(404).transaction("Client introuvable.");
+                    if (!req.client.verifie(decoded.jti || "")) return res.status(401).transaction("Jeton expiré.")
                     return next();
                 } else if (Application.est_aid(sub)) {
                     // Application
@@ -95,6 +95,7 @@ RU.get("/i/dispo/code/:code", TODO); //i.e. l'utilisateur peut utiliser le code 
 RU.post("/c", TODO); // Connexion - Renvoie le jwt à l'utilisateur
 RU.get('/c/valide', TODO); // Permet de vérifier l'état du jeton actuel
 RU.get('/c/:jti', TODO); // Permet à l'application externe de récupérer le jwt
+RU.get('/c/complet/:id', TODO); // Permet de vérifier si l'utilisateur a un mot de passe
 
 // Publique
 RU.get("/pub/:uid", TODO); // Infos publiques { pseudo: pseudo || patronyme, id, photo }

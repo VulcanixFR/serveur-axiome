@@ -1,0 +1,1011 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Axiome",
+        "version": "1.0.0",
+        "description": "A brand new API with no content.  Go nuts!"
+    },
+    "servers": [
+        {
+            "url": "http://{host}:{port}/",
+            "description": "Serveur local de test",
+            "variables": {
+                "host": {
+                    "default": "localhost"
+                },
+                "port": {
+                    "default": "4200"
+                }
+            }
+        }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Page d'accueil"
+                    }
+                }
+            }
+        },
+        "/utilisateur/{uid}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/usr_brut"
+                                }
+                            }
+                        },
+                        "description": "Données brutes de l'utilisateur - Déerminées plus tard par la portée des droits du jeton"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/RespString"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/RespString"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/RespString"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/RespString"
+                    }
+                },
+                "security": [
+                    {
+                        "JWT": []
+                    },
+                    {
+                        "Application": []
+                    }
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "uid",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/utilisateur/i": {
+            "post": {
+                "requestBody": {
+                    "description": "Formulaire d'inscription utilisateur",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form_inscription"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "tags": [
+                    "Utilisateur",
+                    "Publique",
+                    "Inscription"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AxUsr"
+                                }
+                            }
+                        },
+                        "description": "Vrai - Utilisateur Créé; Faux - Utilisateur non créé"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AxBool"
+                                }
+                            }
+                        },
+                        "description": "Le formulaire est invalide"
+                    }
+                },
+                "description": "Inscription d'un utilisateur"
+            }
+        },
+        "/utilisateur/i/dispo/id/{id}": {
+            "get": {
+                "tags": [
+                    "Utilisateur",
+                    "Publique",
+                    "Inscription"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AxBool"
+                                }
+                            }
+                        },
+                        "description": "Vrai - L'id est dispo; Faux - Il ne l'est pas"
+                    }
+                },
+                "description": "Permet de vérifier si un id est disponible"
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/utilisateur/i/dispo/email/{email}": {
+            "get": {
+                "tags": [
+                    "Utilisateur",
+                    "Publique",
+                    "Inscription"
+                ],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AxBool"
+                                }
+                            }
+                        },
+                        "description": "true si le mail n'est pas utilisé, false sinon"
+                    }
+                },
+                "description": "Permet de vérifier si une adresse mail est utilisée"
+            }
+        },
+        "/utilisateur/i/dispo/code/{code}": {
+            "get": {
+                "tags": [
+                    "Utilisateur",
+                    "Publique",
+                    "Inscription"
+                ],
+                "parameters": [
+                    {
+                        "name": "code",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AxBool"
+                                }
+                            }
+                        },
+                        "description": "Vrai - Le code est valide,\nFaux - Le code n'est pas disponible"
+                    }
+                },
+                "description": "Permet de vérifier si un code d'invitation est toujours disponible"
+            },
+            "parameters": [
+                {
+                    "name": "code",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/utilisateur/c/valide": {
+            "description": "",
+            "get": {
+                "tags": [
+                    "Utilisateur",
+                    "Connexion"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AxString"
+                                }
+                            }
+                        },
+                        "description": "Renvoie l'id du jeton [jti] comme confirmation"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/JetonInvalide"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/JetonInvalide"
+                    }
+                },
+                "description": "Renouvelle un jeton encore valide, ou renvoie une erreur"
+            }
+        },
+        "/utilisateur/c": {
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form_connexion"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "tags": [
+                    "Utilisateur",
+                    "Publique",
+                    "Connexion"
+                ],
+                "parameters": [
+                    {
+                        "name": "redirect",
+                        "description": "Url de redirection",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie, renvoie je jeton [jwt]"
+                    },
+                    "302": {
+                        "description": "(si redirect présent) Redirige directement vers le receptacle avec le jeton"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/RespString"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AxString"
+                                }
+                            }
+                        },
+                        "description": "Utilisateur Inexistant"
+                    }
+                }
+            }
+        },
+        "/utilisateur/c/{jti}": {
+            "get": {
+                "tags": [
+                    "Application",
+                    "Utilisateur",
+                    "Connexion"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/usr_jwt"
+                                }
+                            }
+                        },
+                        "description": "Donne le jwt à l'application demandeuse"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/JetonInvalide"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/JetonInvalide"
+                    }
+                },
+                "security": [
+                    {
+                        "Application": []
+                    }
+                ],
+                "description": "Permet à une application de récupérer les informations de connexion d'un utilisateur."
+            },
+            "parameters": [
+                {
+                    "name": "jti",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/utilisateur/c/complet/{id}": {
+            "get": {
+                "tags": [
+                    "Utilisateur",
+                    "Publique",
+                    "Connexion"
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/RepBool"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AxBool"
+                                }
+                            }
+                        },
+                        "description": "Utilisateur inexistant"
+                    }
+                },
+                "description": "Permet de savoir si l'utilisateur possède un mot de passe."
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/utilisateur/i/dispo/code/{code}/{id}": {
+            "get": {
+                "tags": [
+                    "Utilisateur",
+                    "Publique",
+                    "Connexion",
+                    "Inscription",
+                    "Code"
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/RepBool"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/RepBool"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/RespString"
+                    }
+                },
+                "description": "Permet de vérifier si l'utilisateur [id] peut s'inscrire avec le code [code] (ou réinitialiser son mot de passe)."
+            },
+            "parameters": [
+                {
+                    "name": "code",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "in": "path",
+                    "required": true
+                },
+                {
+                    "name": "id",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/utilisateur/pub/{uid}": {
+            "get": {
+                "tags": [
+                    "Utilisateur",
+                    "Publique"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AxUsr"
+                                }
+                            }
+                        },
+                        "description": "Informations de l'utilisateur"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/RespString"
+                    }
+                },
+                "description": "Permet d'obtenir les infos publiques de l'utilisateur"
+            },
+            "parameters": [
+                {
+                    "name": "uid",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        }
+    },
+    "components": {
+        "schemas": {
+            "entete": {
+                "title": "Root Type for entete",
+                "description": "",
+                "type": "object",
+                "properties": {
+                    "cree": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "version": {
+                        "$ref": "#/components/schemas/entete_version"
+                    },
+                    "domaine": {
+                        "type": "string"
+                    },
+                    "decoration": {
+                        "$ref": "#/components/schemas/entete_decoration"
+                    }
+                },
+                "example": {
+                    "cree": "2022-06-18T19:19:39.139Z",
+                    "version": {
+                        "annee": "2022",
+                        "mois": "06",
+                        "jour": "05",
+                        "nom": "Nihil",
+                        "surnom": "E-Cars",
+                        "suffixe": "prealpha"
+                    },
+                    "domaine": "localhost",
+                    "decoration": {}
+                }
+            },
+            "entete_decoration": {
+                "title": "Root Type for entete_decoration",
+                "description": "",
+                "type": "object",
+                "properties": {
+                    "accentuation": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "type": "string"
+                    },
+                    "titre": {
+                        "type": "string"
+                    },
+                    "apropos": {
+                        "type": "string"
+                    }
+                },
+                "example": {}
+            },
+            "entete_version": {
+                "title": "Root Type for entete_version",
+                "description": "",
+                "type": "object",
+                "properties": {
+                    "annee": {
+                        "type": "string"
+                    },
+                    "mois": {
+                        "type": "string"
+                    },
+                    "jour": {
+                        "type": "string"
+                    },
+                    "nom": {
+                        "type": "string"
+                    },
+                    "surnom": {
+                        "type": "string"
+                    },
+                    "suffixe": {
+                        "type": "string"
+                    }
+                },
+                "example": {
+                    "annee": "2022",
+                    "mois": "06",
+                    "jour": "05",
+                    "nom": "Nihil",
+                    "surnom": "E-Cars",
+                    "suffixe": "prealpha"
+                }
+            },
+            "AxString": {
+                "title": "Root Type for AxString",
+                "description": "",
+                "required": [
+                    "@axiome",
+                    "valeur"
+                ],
+                "type": "object",
+                "properties": {
+                    "@axiome": {
+                        "$ref": "#/components/schemas/entete"
+                    },
+                    "valeur": {
+                        "type": "string"
+                    }
+                },
+                "example": {
+                    "@axiome": {
+                        "cree": "2022-06-18T19:19:39.139Z",
+                        "version": {
+                            "annee": "2022",
+                            "mois": "06",
+                            "jour": "05",
+                            "nom": "Nihil",
+                            "surnom": "E-Cars",
+                            "suffixe": "prealpha"
+                        },
+                        "domaine": "localhost",
+                        "decoration": {}
+                    },
+                    "valeur": "Oui."
+                }
+            },
+            "AxBool": {
+                "title": "Root Type for AxBool",
+                "description": "",
+                "required": [
+                    "@axiome",
+                    "valeur"
+                ],
+                "type": "object",
+                "properties": {
+                    "@axiome": {
+                        "$ref": "#/components/schemas/entete"
+                    },
+                    "valeur": {
+                        "type": "boolean"
+                    }
+                },
+                "example": {
+                    "@axiome": {
+                        "cree": "2022-06-18T19:19:39.139Z",
+                        "version": {
+                            "annee": "2022",
+                            "mois": "06",
+                            "jour": "05",
+                            "nom": "Nihil",
+                            "surnom": "E-Cars",
+                            "suffixe": "prealpha"
+                        },
+                        "domaine": "localhost",
+                        "decoration": {}
+                    },
+                    "valeur": true
+                }
+            },
+            "form_inscription": {
+                "title": "Root Type for form_inscription",
+                "description": "Formulaire d'inscription",
+                "required": [
+                    "email",
+                    "id",
+                    "naissance",
+                    "mdp",
+                    "prenom"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "naissance": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "nom": {
+                        "type": "string"
+                    },
+                    "prenom": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "mdp": {
+                        "type": "string"
+                    },
+                    "pseudo": {
+                        "type": "string"
+                    }
+                },
+                "example": {
+                    "id": "bonjour",
+                    "email": "truc@machin.pi",
+                    "naissance": "2002-06-20T09:07:20.535Z",
+                    "nom": "Dupont",
+                    "prenom": "Pont",
+                    "code": "abcdefg",
+                    "mdp": "unmotdepassetrèssécurisé",
+                    "pseudo": "Martin42"
+                }
+            },
+            "usr_brut": {
+                "title": "Root Type for usr_brut",
+                "description": "",
+                "required": [
+                    "pseudo",
+                    "id",
+                    "photo"
+                ],
+                "type": "object",
+                "properties": {
+                    "uid": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "naissance": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "photo": {
+                        "type": "string"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "nom": {
+                        "type": "string"
+                    },
+                    "prenom": {
+                        "type": "string"
+                    },
+                    "patronyme": {
+                        "type": "string"
+                    },
+                    "pseudo": {
+                        "type": "string"
+                    }
+                },
+                "example": {
+                    "uid": "u:85bfe054-96f3-4a75-b503-03b7c7c5d3f7",
+                    "id": "admin",
+                    "email": "admin@localhost",
+                    "naissance": "2022-06-18T16:48:15.691Z",
+                    "photo": "",
+                    "roles": [],
+                    "nom": "",
+                    "prenom": "Administrateur",
+                    "patronyme": "Administrateur",
+                    "pseudo": "Administrateur"
+                }
+            },
+            "AxUsr": {
+                "title": "Root Type for AxUsr",
+                "description": "",
+                "required": [
+                    "@axiome",
+                    "valeur"
+                ],
+                "type": "object",
+                "properties": {
+                    "@axiome": {
+                        "$ref": "#/components/schemas/entete",
+                        "properties": {
+                            "cree": {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            "version": {
+                                "type": "object",
+                                "properties": {
+                                    "annee": {
+                                        "type": "string"
+                                    },
+                                    "mois": {
+                                        "type": "string"
+                                    },
+                                    "jour": {
+                                        "type": "string"
+                                    },
+                                    "nom": {
+                                        "type": "string"
+                                    },
+                                    "surnom": {
+                                        "type": "string"
+                                    },
+                                    "suffixe": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "domaine": {
+                                "type": "string"
+                            },
+                            "decoration": {
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "valeur": {
+                        "$ref": "#/components/schemas/usr_brut",
+                        "properties": {
+                            "uid": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "string"
+                            },
+                            "email": {
+                                "type": "string"
+                            },
+                            "naissance": {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            "photo": {
+                                "type": "string"
+                            },
+                            "roles": {
+                                "type": "array",
+                                "items": {}
+                            },
+                            "nom": {
+                                "type": "string"
+                            },
+                            "prenom": {
+                                "type": "string"
+                            },
+                            "patronyme": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "example": {
+                    "@axiome": {
+                        "cree": "2022-06-18T19:19:39.139Z",
+                        "version": {
+                            "annee": "2022",
+                            "mois": "06",
+                            "jour": "05",
+                            "nom": "Nihil",
+                            "surnom": "E-Cars",
+                            "suffixe": "prealpha"
+                        },
+                        "domaine": "localhost",
+                        "decoration": {}
+                    },
+                    "valeur": {
+                        "uid": "u:85bfe054-96f3-4a75-b503-03b7c7c5d3f7",
+                        "photo": "",
+                        "pseudo": "Administrateur"
+                    }
+                }
+            },
+            "form_connexion": {
+                "title": "Root Type for form_connexion",
+                "description": "Formulaire pour une nouvelle connexion",
+                "required": [
+                    "id",
+                    "mdp",
+                    "code"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "mdp": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "description": "Code d'inscription",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "example": "{\n    \"id\": \"truc@hote:port\",\n    \"mdp\": \"motdepasseenclair\",\n    \"code\": [042, 896, 3598]\n}"
+            },
+            "jwt_list": {
+                "title": "Root Type for jwt_list",
+                "description": "Array de JWT d'un utilisateur\n",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/usr_jwt"
+                },
+                "example": [
+                    {
+                        "jti": "7c09fd24-159a-44c7-b4d6-59cb32140364",
+                        "agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.124 Safari/537.36 Edg/102.0.1245.44",
+                        "jeton": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3YzA5ZmQyNC0xNTlhLTQ0YzctYjRkNi01OWNiMzIxNDAzNjQiLCJpc3MiOiJsb2NhbGhvc3QiLCJzdWIiOiJ1Ojg1YmZlMDU0LTk2ZjMtNGE3NS1iNTAzLTAzYjdjN2M1ZDNmNyIsImlhdCI6MTY1NTk5MDQ4ODA2MiwiZXhwIjoxNjU2NTk1Mjg4MDYyfQ.AOP18MMn5Gd_dPBIpaOLiuBxmsG-IDCktAdW72JpbOvD97q92Vqhr8b-8a023Kj_Q5BeZryXCxrsLNl5ICY_7w",
+                        "creation": "2022-06-23T13:21:28.062Z",
+                        "peremption": "2022-06-30T13:21:28.062Z"
+                    },
+                    {
+                        "jti": "e66b80bb-d6cf-4616-8208-6a9ad5f55ca5",
+                        "agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.124 Safari/537.36 Edg/102.0.1245.44",
+                        "jeton": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlNjZiODBiYi1kNmNmLTQ2MTYtODIwOC02YTlhZDVmNTVjYTUiLCJpc3MiOiJsb2NhbGhvc3QiLCJzdWIiOiJ1Ojg1YmZlMDU0LTk2ZjMtNGE3NS1iNTAzLTAzYjdjN2M1ZDNmNyIsImlhdCI6MTY1NTk5MDQ4OTg5NiwiZXhwIjoxNjU2NTk1Mjg5ODk2fQ.obyd_fcYyQsM22AmvOEmLBQbiA6qSwsDlfQllJ_qjLExP6quo-v88n7LbqYNyX_tox06X5v1LO_6qiuk5VD-Dg",
+                        "creation": "2022-06-23T13:21:29.896Z",
+                        "peremption": "2022-06-30T13:21:29.896Z"
+                    },
+                    {
+                        "jti": "5e36940d-0849-48e8-9a3d-15461a04240f",
+                        "agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.124 Safari/537.36 Edg/102.0.1245.44",
+                        "jeton": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1ZTM2OTQwZC0wODQ5LTQ4ZTgtOWEzZC0xNTQ2MWEwNDI0MGYiLCJpc3MiOiJsb2NhbGhvc3QiLCJzdWIiOiJ1Ojg1YmZlMDU0LTk2ZjMtNGE3NS1iNTAzLTAzYjdjN2M1ZDNmNyIsImlhdCI6MTY1NTk5MDQ5MDU2NSwiZXhwIjoxNjU2NTk1MjkwNTY1fQ.8mk9M7nX4HYZAI4L5Rz-6ALoZ-90fJ1Aoog8pGnEp2rU-mwMr4ebe4MvtsWGh4dKartiLXDjVFLqxlN8vbOrDw",
+                        "creation": "2022-06-23T13:21:30.565Z",
+                        "peremption": "2022-06-30T13:21:30.565Z"
+                    },
+                    {
+                        "jti": "fba767f1-b9e3-433a-b286-0e7219813103",
+                        "agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.124 Safari/537.36 Edg/102.0.1245.44",
+                        "jeton": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmYmE3NjdmMS1iOWUzLTQzM2EtYjI4Ni0wZTcyMTk4MTMxMDMiLCJpc3MiOiJsb2NhbGhvc3QiLCJzdWIiOiJ1Ojg1YmZlMDU0LTk2ZjMtNGE3NS1iNTAzLTAzYjdjN2M1ZDNmNyIsImlhdCI6MTY1NTk5MDQ5MTEzMiwiZXhwIjoxNjU2NTk1MjkxMTMyfQ.Al5nl_ltJRVhIjCTAKiuVl0CnFCIQb48Cy3p4V2eWxeYEg_vGBcvp4Cw72grxGRVffTLhImAwykZGMCOx5JRbA",
+                        "creation": "2022-06-23T13:21:31.132Z",
+                        "peremption": "2022-06-30T13:21:31.132Z"
+                    }
+                ]
+            },
+            "usr_jwt": {
+                "title": "Root Type for usr_jwt",
+                "description": "",
+                "type": "object",
+                "properties": {
+                    "jti": {
+                        "type": "string"
+                    },
+                    "agent": {
+                        "type": "string"
+                    },
+                    "jeton": {
+                        "type": "string"
+                    },
+                    "creation": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "peremption": {
+                        "format": "date-time",
+                        "type": "string"
+                    }
+                },
+                "example": {
+                    "jti": "fba767f1-b9e3-433a-b286-0e7219813103",
+                    "agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.124 Safari/537.36 Edg/102.0.1245.44",
+                    "jeton": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmYmE3NjdmMS1iOWUzLTQzM2EtYjI4Ni0wZTcyMTk4MTMxMDMiLCJpc3MiOiJsb2NhbGhvc3QiLCJzdWIiOiJ1Ojg1YmZlMDU0LTk2ZjMtNGE3NS1iNTAzLTAzYjdjN2M1ZDNmNyIsImlhdCI6MTY1NTk5MDQ5MTEzMiwiZXhwIjoxNjU2NTk1MjkxMTMyfQ.Al5nl_ltJRVhIjCTAKiuVl0CnFCIQb48Cy3p4V2eWxeYEg_vGBcvp4Cw72grxGRVffTLhImAwykZGMCOx5JRbA",
+                    "creation": "2022-06-23T13:21:31.132Z",
+                    "peremption": "2022-06-30T13:21:31.132Z"
+                }
+            }
+        },
+        "responses": {
+            "RespString": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/AxString"
+                        }
+                    }
+                },
+                "description": ""
+            },
+            "RepBool": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/AxBool"
+                        }
+                    }
+                },
+                "description": ""
+            },
+            "JetonInvalide": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/AxString"
+                        }
+                    }
+                },
+                "description": ""
+            }
+        },
+        "securitySchemes": {
+            "JWT": {
+                "scheme": "bearer",
+                "type": "http",
+                "description": "Json Web Token"
+            },
+            "admin-mdp": {
+                "scheme": "bearer",
+                "type": "http",
+                "description": "Mot de passe Administrateur"
+            },
+            "Application": {
+                "scheme": "bearer",
+                "type": "http",
+                "description": "JWT d'application"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Utilisateur",
+            "description": ""
+        },
+        {
+            "name": "Application",
+            "description": ""
+        },
+        {
+            "name": "Admin",
+            "description": ""
+        },
+        {
+            "name": "Domaine",
+            "description": ""
+        },
+        {
+            "name": "Publique",
+            "description": ""
+        },
+        {
+            "name": "Code",
+            "description": ""
+        },
+        {
+            "name": "Inscription",
+            "description": ""
+        },
+        {
+            "name": "Connexion",
+            "description": ""
+        }
+    ]
+}

@@ -3,6 +3,7 @@ import { transaction_middleware } from './Transaction/transaction';
 import { initAxiome } from './axiome';
 import { domaine_middleware } from './Domaine/domaine';
 import RouteurUtilisateur from './Utilisateur/router';
+import RouteurAdmin from './Admin/admin';
 
 const App = express();
 console.log("Bonjour !");
@@ -15,7 +16,7 @@ console.log("Bonjour !");
         req.axiome = Axiome;
         res.setHeader("X-Powered-By", Axiome.version.long());
         next();
-    }, domaine_middleware, /*auth_middleware,*/ transaction_middleware);
+    }, domaine_middleware, transaction_middleware);
 
     App.use("/static", express.static("static"))
 
@@ -24,6 +25,8 @@ console.log("Bonjour !");
     })
 
     App.use("/utilisateur", RouteurUtilisateur);
+
+    App.use('/admin', RouteurAdmin);
 
     App.get('/test/admin', async (req, res, next) => {
         let admin = await req.domaine.utilisateur(req.domaine.admin_id);
